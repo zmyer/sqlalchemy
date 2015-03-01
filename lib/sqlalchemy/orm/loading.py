@@ -292,19 +292,20 @@ def _instance_processor(
         props = props.intersection(
             mapper._props[k] for k in only_load_props)
 
-    quick_populators = \
-        path.get(
-            context.attributes, "memoized_setups", _none_set)
+    quick_populators = path.get(
+        context.attributes, "memoized_setups", _none_set)
 
     for prop in props:
-        if False: #prop in quick_populators:
+        if prop in quick_populators:
             # this is an inlined path just for column-based attributes.
             col = quick_populators[prop]
             if col is _DEFER_FOR_STATE:
                 populators["new"].append(
                     (prop.key, prop._deferred_column_loader))
-
             elif col is _SET_DEFERRED_EXPIRED:
+                # note that in this path, we are no longer
+                # searching in the result to see if the column might
+                # be present in some unexpected way.
                 populators["expire"].append((prop.key, False))
             else:
                 if adapter:
@@ -313,7 +314,11 @@ def _instance_processor(
                 if getter:
                     populators["quick"].append((prop.key, getter))
                 else:
-                    populators["expire"].append((prop.key, True))
+                    # fall back to the ColumnProperty itself, which
+                    # will iterate through all of its columns
+                    # to see if one fits
+                    prop.create_row_processor(
+                        context, path, mapper, result, adapter, populators)
         else:
             prop.create_row_processor(
                 context, path, mapper, result, adapter, populators)

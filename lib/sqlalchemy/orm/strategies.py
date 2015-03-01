@@ -200,19 +200,12 @@ class DeferredColumnLoader(LoaderStrategy):
     def create_row_processor(
             self, context, path, loadopt,
             mapper, result, adapter, populators):
-        col = self.columns[0]
-        if adapter:
-            col = adapter.columns[col]
 
-        # TODO: put a result-level contains here
-        getter = result._getter(col)
-        if getter:
-            self.parent_property._get_strategy_by_cls(ColumnLoader).\
-                create_row_processor(
-                    context, path, loadopt, mapper, result,
-                    adapter, populators)
-
-        elif not self.is_class_level:
+        # this path currently does not check the result
+        # for the column; this is because in most cases we are
+        # working just with the setup_query() directive which does
+        # not support this, and the behavior here should be consistent.
+        if not self.is_class_level:
             set_deferred_for_local_state = \
                 self.parent_property._deferred_column_loader
             populators["new"].append((self.key, set_deferred_for_local_state))
