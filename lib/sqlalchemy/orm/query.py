@@ -3277,7 +3277,7 @@ class _MapperEntity(_QueryEntity):
         else:
             only_load_props = refresh_state = None
 
-        _instance = loading.instance_processor(
+        _instance = loading._instance_processor(
             self.mapper,
             context,
             result,
@@ -3311,17 +3311,8 @@ class _MapperEntity(_QueryEntity):
             context, self.mapper, self,
             self.path, adapter, context.primary_columns,
             with_polymorphic=self._with_polymorphic,
-            only_load_props=query._only_load_props)
-
-        if self._polymorphic_discriminator is not None and \
-            self._polymorphic_discriminator \
-                is not self.mapper.polymorphic_on:
-
-            if adapter:
-                pd = adapter.columns[self._polymorphic_discriminator]
-            else:
-                pd = self._polymorphic_discriminator
-            context.primary_columns.append(pd)
+            only_load_props=query._only_load_props,
+            polymorphic_discriminator=self._polymorphic_discriminator)
 
     def __str__(self):
         return str(self.mapper)
