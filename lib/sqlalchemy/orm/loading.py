@@ -218,6 +218,36 @@ def load_on_ident(query, key,
         return None
 
 
+def _setup_entity_query(
+    context, mapper, query_entity,
+        path, adapter, column_collection,
+        with_polymorphic=None, only_load_props=None, **kw):
+
+    if with_polymorphic:
+        poly_properties = mapper._iterate_polymorphic_properties(
+            with_polymorphic)
+    else:
+        poly_properties = mapper._polymorphic_properties
+
+    quick_populators = {}
+    path.set(context.attributes, "quick_populators", quick_populators)
+
+    for value in poly_properties:
+        if only_load_props and \
+                value.key not in only_load_props:
+            continue
+        value.setup(
+            context,
+            query_entity,
+            path,
+            adapter,
+            only_load_props=only_load_props,
+            column_collection=column_collection,
+            quick_populators=quick_populators,
+            **kw
+        )
+
+
 def instance_processor(mapper, context, result, path, adapter,
                        only_load_props=None, refresh_state=None,
                        polymorphic_discriminator=None,
@@ -244,7 +274,12 @@ def instance_processor(mapper, context, result, path, adapter,
     if only_load_props is not None:
         props = (p for p in props if p.key in only_load_props)
 
+    #quick_populators = path.get(context.attributes, "quick_populators", ())
     for prop in props:
+        #if prop.key in quick_populators:
+        #    col = quick_populators[prop.key]
+        #    populators["quick"].append((prop.key, result._getter(col)))
+        #else:
         prop.create_row_processor(
             context, path, mapper, result, adapter, populators)
 
