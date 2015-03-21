@@ -115,6 +115,14 @@ class MySQLDialect_mysqlconnector(MySQLDialect):
         util.coerce_kw_type(opts, 'buffered', bool)
         util.coerce_kw_type(opts, 'raise_on_warnings', bool)
 
+        # TODO: not do this, but we can't really support "raw"
+        # mode which is what this is
+        # if not util.coerce_kw_type(opts, 'use_unicode', bool):
+        #    raise Exception("use unicode=0 is not supported")
+
+        # TODO: this?
+        util.coerce_kw_type(opts, 'charset', str)
+
         # unfortunately, MySQL/connector python refuses to release a
         # cursor without reading fully, so non-buffered isn't an option
         opts.setdefault('buffered', True)

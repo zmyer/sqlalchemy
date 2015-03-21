@@ -65,6 +65,7 @@ if py3k:
     text_type = str
     int_types = int,
     iterbytes = iter
+    all_binary_types = (bytes, bytearray)
 
     def u(s):
         return s
@@ -117,6 +118,7 @@ else:
     binary_type = str
     text_type = unicode
     int_types = int, long
+    all_binary_types = (str, )
 
     def iterbytes(buf):
         return (ord(byte) for byte in buf)

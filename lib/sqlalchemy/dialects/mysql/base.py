@@ -2449,7 +2449,7 @@ class MySQLDialect(default.DefaultDialect):
         cursor.execute('SELECT @@tx_isolation')
         val = cursor.fetchone()[0]
         cursor.close()
-        if util.py3k and isinstance(val, bytes):
+        if util.py3k and isinstance(val, util.all_binary_types):
             val = val.decode()
         return val.upper().replace("-", " ")
 
@@ -3358,7 +3358,7 @@ class _DecodingRowProxy(object):
         if isinstance(item, _array):
             item = item.tostring()
 
-        if self.charset and isinstance(item, util.binary_type):
+        if self.charset and isinstance(item, util.all_binary_types):
             return item.decode(self.charset)
         else:
             return item
@@ -3367,7 +3367,7 @@ class _DecodingRowProxy(object):
         item = getattr(self.rowproxy, attr)
         if isinstance(item, _array):
             item = item.tostring()
-        if self.charset and isinstance(item, util.binary_type):
+        if self.charset and isinstance(item, util.all_binary_types):
             return item.decode(self.charset)
         else:
             return item

@@ -393,6 +393,17 @@ UnicodeResultProcessor_process(UnicodeResultProcessor *self, PyObject *value)
         Py_RETURN_NONE;
 
 #if PY_MAJOR_VERSION >= 3
+    /*
+    // if at some point we want to support mysqlconnector (or someone elses')
+    // return of bytearray() here
+    if (PyByteArray_Check(value)) {
+        str = PyByteArray_AsString(value);
+        if (str == NULL) {
+            return NULL;
+        }
+        len = strlen(str);
+    }
+    else*/
     if (PyBytes_AsStringAndSize(value, &str, &len))
         return NULL;
 
