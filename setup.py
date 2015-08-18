@@ -10,6 +10,8 @@ from setuptools import Distribution as _Distribution, Extension
 from setuptools import setup
 from setuptools import find_packages
 from setuptools.command.test import test as TestCommand
+from Cython.Build import cythonize
+
 
 cmdclass = {}
 if sys.version_info < (2, 6):
@@ -24,7 +26,7 @@ ext_modules = [
               sources=['lib/sqlalchemy/cextension/resultproxy.c']),
     Extension('sqlalchemy.cutils',
               sources=['lib/sqlalchemy/cextension/utils.c'])
-]
+] + cythonize("lib/sqlalchemy/orm/loading_speedups.pyx")
 
 ext_errors = (CCompilerError, DistutilsExecError, DistutilsPlatformError)
 if sys.platform == 'win32':
