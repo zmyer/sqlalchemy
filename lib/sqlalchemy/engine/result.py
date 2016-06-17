@@ -650,7 +650,11 @@ class ResultProxy(object):
         self.connection = context.root_connection
         self._echo = self.connection._echo and \
             context.engine._should_log_debug()
-        self._init_metadata()
+        try:
+            self._init_metadata()
+        except:
+            self._soft_close()
+            raise
 
     def _getter(self, key, raiseerr=True):
         try:
