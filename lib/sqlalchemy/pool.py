@@ -469,6 +469,31 @@ class _ConnectionRecord(object):
         This dictionary is shared among the :attr:`._ConnectionFairy.info`
         and :attr:`.Connection.info` accessors.
 
+        .. note::
+
+            The lifespan of this dictionary is linked to the
+            DBAPI connection itself, meaning that it is **discarded** each time
+            the DBAPI connection is closed and/or invalidated.   The
+            :attr:`._ConnectionRecord.record_info` dictionary remains
+            persistent throughout the lifespan of the
+            :class:`._ConnectionRecord` container.
+
+        """
+        return {}
+
+    @util.memoized_property
+    def record_info(self):
+        """An "info' dictionary associated with the connection record
+        itself.
+
+        Unlike the :attr:`._ConnectionRecord.info` dictionary, which is linked
+        to the lifespan of the DBAPI connection, this dictionary is linked
+        to the lifespan of the :class:`._ConnectionRecord` container itself
+        and will remain persisent throughout the life of the
+        :class:`._ConnectionRecord`.
+
+        .. versionadded:: 1.1
+
         """
         return {}
 
@@ -814,8 +839,29 @@ class _ConnectionFairy(object):
         with the :attr:`._ConnectionRecord.info` and :attr:`.Connection.info`
         accessors.
 
+        The dictionary associated with a particular DBAPI connection is
+        discarded when the connection itself is discarded.
+
         """
         return self._connection_record.info
+
+    @property
+    def record_info(self):
+        """Info dictionary associated with the :class:`._ConnectionRecord
+        container referred to by this :class:`.ConnectionFairy`.
+
+        Unlike the :attr:`._ConnectionFairy.info` dictionary, the lifespan
+        of this dictionary is persistent across connections that are
+        disconnected and/or invalidated within the lifespan of a
+        :class:`._ConnectionRecord`.
+
+        .. versionadded:: 1.1
+
+        """
+        if self._connection_record:
+            return self._connection_record.record_info
+        else:
+            return None
 
     def invalidate(self, e=None, soft=False):
         """Mark this connection as invalidated.

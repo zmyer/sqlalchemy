@@ -232,6 +232,34 @@ class PoolTest(PoolTestBase):
         assert not c2.info
         assert 'foo2' in c.info
 
+    def test_rec_info(self):
+        p = self._queuepool_fixture(pool_size=1, max_overflow=0)
+
+        c = p.connect()
+        self.assert_(not c.record_info)
+        self.assert_(c.record_info is c._connection_record.record_info)
+
+        c.record_info['foo'] = 'bar'
+        c.close()
+        del c
+
+        c = p.connect()
+        self.assert_('foo' in c.record_info)
+
+        c.invalidate()
+        c = p.connect()
+        self.assert_('foo' in c.record_info)
+
+        c.record_info['foo2'] = 'bar2'
+        c.detach()
+        is_(c.record_info, None)
+        is_(c._connection_record, None)
+
+        c2 = p.connect()
+
+        assert c2.record_info
+        assert 'foo2' in c2.record_info
+
     def test_rec_unconnected(self):
         # test production of a _ConnectionRecord with an
         # initally unconnected state.
