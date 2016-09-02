@@ -232,6 +232,53 @@ class PoolTest(PoolTestBase):
         assert not c2.info
         assert 'foo2' in c.info
 
+    def test_rec_unconnected(self):
+        # test production of a _ConnectionRecord with an
+        # initally unconnected state.
+
+        dbapi = MockDBAPI()
+        p1 = pool.Pool(
+            creator=lambda: dbapi.connect('foo.db')
+        )
+
+        r1 = pool._ConnectionRecord(p1, connect=False)
+
+        assert not r1.connection
+        c1 = r1.get_connection()
+        is_(c1, r1.connection)
+
+    def test_rec_close_reopen(self):
+        # test that _ConnectionRecord.close() allows
+        # the record to be reusable
+        dbapi = MockDBAPI()
+        p1 = pool.Pool(
+            creator=lambda: dbapi.connect('foo.db')
+        )
+
+        r1 = pool._ConnectionRecord(p1)
+
+        c1 = r1.connection
+        c2 = r1.get_connection()
+        is_(c1, c2)
+
+        r1.close()
+
+        assert not r1.connection
+        eq_(
+            c1.mock_calls,
+            [call.close()]
+        )
+
+        c2 = r1.get_connection()
+
+        is_not_(c1, c2)
+        is_(c2, r1.connection)
+
+        eq_(
+            c2.mock_calls,
+            []
+        )
+
 
 class PoolDialectTest(PoolTestBase):
     def _dialect(self):

@@ -445,9 +445,10 @@ class _ConnectionRecord(object):
 
     """
 
-    def __init__(self, pool):
+    def __init__(self, pool, connect=True):
         self.__pool = pool
-        self.__connect(first_connect_check=True)
+        if connect:
+            self.__connect(first_connect_check=True)
         self.finalize_callback = deque()
 
     connection = None
@@ -590,6 +591,7 @@ class _ConnectionRecord(object):
         if self.__pool.dispatch.close:
             self.__pool.dispatch.close(self.connection, self)
         self.__pool._close_connection(self.connection)
+        self.connection = None
 
     def __connect(self, first_connect_check=False):
         pool = self.__pool
