@@ -451,6 +451,8 @@ class _ConnectionRecord(object):
             self.__connect(first_connect_check=True)
         self.finalize_callback = deque()
 
+    fairy_ref = None
+
     connection = None
     """A reference to the actual DBAPI connection being tracked.
 
@@ -530,6 +532,10 @@ class _ConnectionRecord(object):
         if pool.dispatch.checkin:
             pool.dispatch.checkin(connection, self)
         pool._return_conn(self)
+
+    @property
+    def in_use(self):
+        return self.fairy_ref is not None
 
     def close(self):
         if self.connection is not None:
